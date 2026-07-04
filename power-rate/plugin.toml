@@ -1,0 +1,11 @@
+id           = "radimous/power-rate"
+name         = "Power Rate"
+version      = "1.0.0"
+min_noctalia = "5.0.0"
+author       = "radimous"
+license = "MIT"
+
+
+[[widget]]
+id    = "power-rate"
+entry = "power-rate.luau"

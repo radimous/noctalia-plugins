@@ -1,0 +1,17 @@
+[[plugin]]
+id = "radimous/power-rate"
+name = "Power Rate"
+version = "1.0.0"
+author = "noctalia"
+license = "MIT"
+min_noctalia = "5.0.0"
+tags = ["power", "battery"]
+
+[[plugin]]
+id = "radimous/prism-instances"
+name = "PrismLauncher Instances"
+version = "1.0.0"
+author = "noctalia"
+license = "MIT"
+min_noctalia = "5.0.0"
+tags = ["prism", "launcher", "prismlauncher"]
