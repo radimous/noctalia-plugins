@@ -5,8 +5,6 @@ local function getPrismPath()
     return noctalia.expandPath(prismPath)
 end
 
-local cachedInstances = nil
-
 local function trim(s)
   return (s:match("^%s*(.-)%s*$"))
 end
@@ -19,11 +17,22 @@ local function shellQuote(s)
   return "'" .. s:gsub("'", "'\"'\"'") .. "'"
 end
 
-local function loadInstances(onDone)
-  local prism = getPrismPath()
-  local instances = prism .. "/instances" -- TODO: read prism cfg for instance path
+local function getInstanceDir()
+    local prism = getPrismPath()
 
-  local cmd = string.format("for d in " .. instances .. "/*/; do basename \"$d\"; done")
+    local instanceDir = getValue(prism .. "/prismlauncher.cfg", "InstanceDir")
+
+    local instances
+    if instanceDir == nil then
+        instances = prism .. "/instances"
+        else
+        instances = prism .. "/" .. instanceDir
+    end
+    return instances
+end
+
+local function loadInstances(onDone)
+   local cmd = string.format("for d in " .. getInstanceDir() .. "/*/; do basename \"$d\"; done")
 
   noctalia.runAsync(cmd, function(result)
     local instances = {}
@@ -84,11 +93,6 @@ end
 function onQuery(query)
   local filter = trim(query)
 
-  if cachedInstances then
-    showResults(query, cachedInstances, filter)
-    return
-  end
-
   launcher.setResults(query, {
     { id = "", title = "Loading…", subtitle = "Reading PrismLauncher instances", glyph = "loader" }
   })
@@ -103,10 +107,10 @@ function onActivate(id)
   noctalia.runAsync(string.format("prismlauncher --launch %s &>/dev/null", shellQuote(id)))
 end
 
-function getIcon(instancePath)
-    local defaultIcon = getPrismPath() .. "/instances/" .. instancePath .. "/minecraft/icon.png"
-
-    local cfgPath = getPrismPath() .. "/instances/" .. instancePath .. "/instance.cfg"
+function getIcon(instanceName)
+    local instancePath = getInstanceDir() .. "/" .. instanceName
+    local defaultIcon =  instancePath .. "/minecraft/icon.png"
+    local cfgPath = instancePath .. "/instance.cfg"
     local iconVal = getValue(cfgPath, "iconKey")
     if (iconVal == nil) then
         return defaultIcon
@@ -126,7 +130,7 @@ end
 function getValue(cfgPath, key)
     local content, err = noctalia.readFile(cfgPath)
     if not content then
-        noctalia.log("Failed to read file: " .. tostring(err))
+        noctalia.log("Failed to read file ".. cfgPath .. " : " .. tostring(err))
         return nil
     end
 
