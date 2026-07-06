@@ -1,7 +1,7 @@
 -- based on https://github.com/Cleboost/noctalia-plugins/blob/main/zed-projects/zed_projects.luau
 
-prismPath = "~/.local/share/PrismLauncher" -- TODO(config)
 local function getPrismPath()
+    local prismPath = noctalia.getConfig("prism_path")
     return noctalia.expandPath(prismPath)
 end
 
