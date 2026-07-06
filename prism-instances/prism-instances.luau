@@ -25,7 +25,9 @@ local function getInstanceDir()
     local instances
     if instanceDir == nil then
         instances = prism .. "/instances"
-        else
+    elseif instanceDir:sub(1, 1) == "/" then
+        instances = instanceDir
+    else
         instances = prism .. "/" .. instanceDir
     end
     return instances
