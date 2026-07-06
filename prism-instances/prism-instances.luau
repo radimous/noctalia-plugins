@@ -74,7 +74,7 @@ local function showResults(query, instances, filter)
   local filtered = filterInstances(instances, filter)
   if #filtered == 0 then
     launcher.setResults(query, {
-      { id = "", title = "No instances found", subtitle = filter ~= "" and `Filter: "{filter}"` or "Zed database is empty or not found", glyph = "folder-x" }
+      { id = "", title = "No instances found", subtitle = filter ~= "" and `Filter: "{filter}"`, glyph = "folder-x" }
     })
   else
     launcher.setResults(query, makeRows(filtered))
@@ -104,6 +104,77 @@ function onActivate(id)
 end
 
 function getIcon(instancePath)
-    -- TODO: fix custom icons, requires parsing instance config and fetching icon based on icon key
-    return getPrismPath() .. "/instances/" .. instancePath .. "/minecraft/icon.png"
+    local defaultIcon = getPrismPath() .. "/instances/" .. instancePath .. "/minecraft/icon.png"
+
+    local cfgPath = getPrismPath() .. "/instances/" .. instancePath .. "/instance.cfg"
+    local iconVal = getValue(cfgPath, "iconKey")
+    if (iconVal == nil) then
+        return defaultIcon
+    end
+
+    local iconDir = getPrismPath() .. "/icons/"
+    local bestIcon = findBestIconIn(iconDir, iconVal)
+
+    if (bestIcon == nil) then
+        return defaultIcon
+    end
+    return bestIcon
+end
+
+
+
+function getValue(cfgPath, key)
+    local content, err = noctalia.readFile(cfgPath)
+    if not content then
+        noctalia.log("Failed to read file: " .. tostring(err))
+        return nil
+    end
+
+    for line in content:gmatch("[^\r\n]+") do
+        if line:sub(1, #key + 1) == key .. "=" then
+            return line:sub(#key + 2)
+        end
+    end
+
+    return nil
+end
+
+-- https://github.com/PrismLauncher/PrismLauncher/blob/d2fa7cf7f7aa8fa5e3d4f5f7b474621c732cd525/launcher/icons/IconUtils.cpp
+local validIconExtensions = { "svg", "png", "ico", "gif", "jpg", "jpeg", "webp" }
+
+local function isIconSuffix(suffix)
+    for _, ext in ipairs(validIconExtensions) do
+        if ext == suffix then
+            return true
+        end
+    end
+    return false
+end
+
+
+local function splitNameAndSuffix(filename)
+    local dotIndex = filename:find("%.[^.]*$")
+    if not dotIndex then
+        return filename, ""
+    end
+    local base = filename:sub(1, dotIndex - 1)
+    local suffix = filename:sub(dotIndex + 1)
+    return base, suffix
+end
+
+function findBestIconIn(folder, iconKey)
+    local entries = noctalia.listDir(folder)
+    if not entries then
+        return nil
+    end
+
+    for _, filename in ipairs(entries) do
+        local baseName, suffix = splitNameAndSuffix(filename)
+        if (baseName == iconKey or filename == iconKey) and isIconSuffix(suffix) then
+            local sep = folder:sub(-1) == "/" and "" or "/"
+            return folder .. sep .. filename
+        end
+    end
+
+    return nil
 end
