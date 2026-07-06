@@ -9,3 +9,10 @@ license = "MIT"
 [[widget]]
 id    = "power-rate"
 entry = "power-rate.luau"
+
+[[widget.setting]]
+key = "decimal_places"
+type = "int"
+label = "Decimal places"
+default = 0
+max = 5
