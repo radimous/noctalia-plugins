@@ -12,7 +12,7 @@ end
 
 function format(val)
     local num = tonumber(currentThreshold/1000/1000) or -3
-    local decimals = barWidget.getConfig("decimal_places")
+    local decimals = noctalia.getConfig("decimal_places")
     local formatted = string.format("%."..tostring(decimals).."fW", num)
     return formatted
 end
