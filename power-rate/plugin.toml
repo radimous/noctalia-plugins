@@ -1,7 +1,7 @@
 id           = "radimous/power-rate"
 name         = "Power Rate"
 version      = "1.0.0"
-min_noctalia = "5.0.0"
+plugin_api = 3
 author       = "radimous"
 license = "MIT"
 
